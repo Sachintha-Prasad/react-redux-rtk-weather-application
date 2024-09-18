@@ -19,8 +19,6 @@ const WeatherComponent = () => {
         dispatch(fetchWeather("New york"))
     }, [dispatch])
 
-    console.log(weather)
-
     return (
         <div>
             <Input.Search
@@ -30,7 +28,7 @@ const WeatherComponent = () => {
                 onSearch={handleWeatherSearch}
                 loading={isLoading}
                 allowClear
-                required={true}
+                required
                 enterButton
                 size="large"
             />
