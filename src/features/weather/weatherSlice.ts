@@ -26,16 +26,23 @@ const initialState = {
     error: null
 } satisfies WeatherState as WeatherState
 
+const apiKey = process.env.REACT_APP_API_KEY
+
 // fetch weather data
 export const fetchWeather = createAsyncThunk(
     "weather/fetchWeather",
-    async (city: string) => {
-        const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=d3fc7304d18a1d7db09ffae2fd0191ed`
-        )
-        if (response.status !== 200)
-            throw new Error("weather data fetching error!")
-        return response.data
+    async (city: string, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(
+                `https://api.openweathermap.org/data/2.5/weather?q=${city}&APPID=${apiKey}`
+            )
+            return response.data
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data.message)
+            }
+            throw error
+        }
     }
 )
 
@@ -57,7 +64,9 @@ const weatherSlice = createSlice({
         builder.addCase(fetchWeather.rejected, (state, action) => {
             state.isLoading = false
             state.weather = null
-            state.error = action.error.message ?? "Data fetching error"
+            state.error = action.payload
+                ? JSON.stringify(action.payload)
+                : action.error.message ?? "Data fetching error"
         })
     }
 })
